@@ -3,7 +3,6 @@ require("dotenv").config();
 const express = require("express");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
-const xss = require("xss-clean");
 
 const authRoutes = require("./routes/authRoutes");
 const errorHandler = require("./middleware/errorMiddleware");
@@ -13,7 +12,7 @@ const app = express();
 // Security Middlewares
 app.use(helmet());
 app.use(express.json());
-app.use(xss());
+
 
 // Rate Limiting
 const limiter = rateLimit({
