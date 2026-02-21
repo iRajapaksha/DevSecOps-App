@@ -1,0 +1,109 @@
+pipeline {
+    agent any
+
+    environment {
+        // Docker registry
+        DOCKER_REGISTRY = "your-dockerhub-username"
+        IMAGE_NAME = "secure-devsecops-app"
+        // JWT secret (used in docker-compose)
+        JWT_SECRET = credentials('jwt-secret-id')
+        POSTGRES_USER = credentials('postgres-user')
+        POSTGRES_PASSWORD = credentials('postgres-password')
+        POSTGRES_DB = credentials('postgres-db')
+        SONARQUBE = "SonarQube" // Name of Jenkins SonarQube installation
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 60, unit: 'MINUTES')
+    }
+
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/yourusername/secure-devsecops-app.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm ci'
+            }
+        }
+
+        stage('Lint & SAST Scan') {
+            steps {
+                sh 'npx eslint . || exit 1'
+                withSonarQubeEnv("${SONARQUBE}") {
+                    sh 'sonar-scanner'
+                }
+            }
+        }
+
+        stage('Dependency Scan') {
+            steps {
+                sh '''
+                mkdir -p dependency-check-report
+                dependency-check --project "secure-devsecops-app" --scan . --format ALL --out dependency-check-report
+                '''
+            }
+        }
+
+        stage('Run Unit Tests') {
+            steps {
+                sh 'npm test'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh "docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest ."
+            }
+        }
+
+        stage('Docker Scan') {
+            steps {
+                sh "trivy image --exit-code 1 --severity CRITICAL ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest"
+            }
+        }
+
+        stage('Push to Docker Registry') {
+            steps {
+                withDockerRegistry([credentialsId: 'dockerhub-credentials', url: 'https://index.docker.io/v1/']) {
+                    sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest"
+                }
+            }
+        }
+
+        stage('Deploy to Staging') {
+            steps {
+                sh '''
+                docker-compose down
+                docker-compose up -d
+                '''
+            }
+        }
+
+        stage('DAST Scan') {
+            steps {
+                sh '''
+                zap-baseline.py -t http://localhost:3000 -r dast-report.html
+                '''
+            }
+        }
+
+    }
+
+    post {
+        always {
+            sh 'docker-compose down'
+        }
+        success {
+            echo 'Pipeline succeeded ✅'
+        }
+        failure {
+            echo 'Pipeline failed ❌'
+        }
+    }
+}
