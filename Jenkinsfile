@@ -1,6 +1,9 @@
 pipeline {
     agent any
 
+    tools {
+    nodejs "NodeJS"
+    }
     environment {
         // Docker registry
         DOCKER_REGISTRY = "irajapaksha"
@@ -12,9 +15,7 @@ pipeline {
         POSTGRES_DB = credentials('db-name')
         SONARQUBE = "SonarQube" // Name of Jenkins SonarQube installation
     }
-    tools {
-    nodejs "NodeJS"
-    }
+
 
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
@@ -34,6 +35,8 @@ pipeline {
         sh 'echo $PATH'
         sh 'which node'
         sh 'which npm'
+        sh 'node -v'
+        sh 'npm -v'
     }
 }
 
