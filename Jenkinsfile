@@ -12,6 +12,9 @@ pipeline {
         POSTGRES_DB = credentials('db-name')
         SONARQUBE = "SonarQube" // Name of Jenkins SonarQube installation
     }
+    tools {
+    nodejs "NodeJS"
+    }
 
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
