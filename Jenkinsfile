@@ -3,13 +3,13 @@ pipeline {
 
     environment {
         // Docker registry
-        DOCKER_REGISTRY = "your-dockerhub-username"
-        IMAGE_NAME = "secure-devsecops-app"
+        DOCKER_REGISTRY = "irajapaksha"
+        IMAGE_NAME = "backend"
         // JWT secret (used in docker-compose)
-        JWT_SECRET = credentials('jwt-secret-id')
-        POSTGRES_USER = credentials('postgres-user')
-        POSTGRES_PASSWORD = credentials('postgres-password')
-        POSTGRES_DB = credentials('postgres-db')
+        JWT_SECRET = credentials('jwt-secret')
+        POSTGRES_USER = credentials('db-user')
+        POSTGRES_PASSWORD = credentials('db-password')
+        POSTGRES_DB = credentials('db-name')
         SONARQUBE = "SonarQube" // Name of Jenkins SonarQube installation
     }
 
@@ -22,7 +22,7 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/yourusername/secure-devsecops-app.git'
+                git branch: 'main', url: 'https://github.com/iRajapaksha/DevSecOps-App.git'
             }
         }
 
@@ -58,7 +58,7 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh "docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest ."
+                sh "docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest ./app"
             }
         }
 
