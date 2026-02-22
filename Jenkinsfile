@@ -28,6 +28,14 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/iRajapaksha/DevSecOps-App.git'
             }
         }
+        stage('Debug') {
+    steps {
+        sh 'whoami'
+        sh 'echo $PATH'
+        sh 'which node'
+        sh 'which npm'
+    }
+}
 
         stage('Install Dependencies') {
             steps {
