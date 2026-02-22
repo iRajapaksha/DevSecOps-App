@@ -40,11 +40,13 @@ pipeline {
     }
 }
 
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm ci'
-            }
+stage('Install Dependencies') {
+    steps {
+        dir('app') {
+            sh 'npm ci'
         }
+    }
+}
 
         stage('Lint & SAST Scan') {
             steps {
