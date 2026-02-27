@@ -13,6 +13,7 @@ pipeline {
         POSTGRES_USER = credentials('db-user')
         POSTGRES_PASSWORD = credentials('db-password')
         POSTGRES_DB = credentials('db-name')
+        SONAR_TOKEN = credentials('sonar-token')
         SONARQUBE = "SonarQube" // Name of Jenkins SonarQube installation
     }
 
@@ -63,7 +64,7 @@ stage('Debug ESLint') {
                 script {
             def scannerHome = tool 'SonarScanner'
             withSonarQubeEnv("${SONARQUBE}") {
-                sh "${scannerHome}/bin/sonar-scanner"
+                sh "${scannerHome}/bin/sonar-scanner -Dsonar.login=${SONAR_TOKEN}"
             }
         }
         sh 'which sonar-scanner || echo "not found"'
