@@ -47,6 +47,14 @@ stage('Install Dependencies') {
         }
     }
 }
+stage('Debug ESLint') {
+    steps {
+        dir('app') {
+            sh 'cat package.json'
+            sh 'npm list eslint || true'
+        }
+    }
+}
 
         stage('Lint & SAST Scan') {
             steps {
