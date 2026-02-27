@@ -64,7 +64,7 @@ stage('Debug ESLint') {
                 script {
             def scannerHome = tool 'SonarScanner'
             withSonarQubeEnv("${SONARQUBE}") {
-                sh "${scannerHome}/bin/sonar-scanner -Dsonar.login=${SONAR_TOKEN}"
+                sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=devsecops-app -Dsonar.sources=. -Dsonar.host.url=http://13.200.205.49:9000 -Dsonar.login=${SONAR_TOKEN}"
             }
         }
         sh 'which sonar-scanner || echo "not found"'
