@@ -50,10 +50,13 @@ stage('Install Dependencies') {
 
         stage('Lint & SAST Scan') {
             steps {
+                dir('app'){
                 sh 'npx eslint . || exit 1'
                 withSonarQubeEnv("${SONARQUBE}") {
                     sh 'sonar-scanner'
                 }
+                }
+
             }
         }
 
