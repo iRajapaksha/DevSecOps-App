@@ -14,6 +14,8 @@ pipeline {
         POSTGRES_PASSWORD = credentials('db-password')
         POSTGRES_DB = credentials('db-name')
         SONAR_TOKEN = credentials('sonar-token')
+        SONAR_HOST_URL = "http://13.200.205.49:9000"
+        SONAR_PROJECT_KEY = "devsecops-app"
         SONARQUBE = "SonarQube" // Name of Jenkins SonarQube installation
     }
 
@@ -39,23 +41,23 @@ pipeline {
         sh 'node -v'
         sh 'npm -v'
     }
-}
+    }
 
-stage('Install Dependencies') {
-    steps {
-        dir('app') {
-            sh 'npm ci'
+        stage('Install Dependencies') {
+            steps {
+                dir('app') {
+                    sh 'npm ci'
+                }
+            }
         }
-    }
-}
-stage('Debug ESLint') {
-    steps {
-        dir('app') {
-            sh 'cat package.json'
-            sh 'npm list eslint || true'
+        stage('Debug ESLint') {
+            steps {
+                dir('app') {
+                    sh 'cat package.json'
+                    sh 'npm list eslint || true'
+                }
+            }
         }
-    }
-}
 
         stage('Lint & SAST Scan') {
             steps {
@@ -64,23 +66,34 @@ stage('Debug ESLint') {
                 script {
             def scannerHome = tool 'SonarScanner'
             withSonarQubeEnv("${SONARQUBE}") {
-                sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=devsecops-app -Dsonar.sources=. -Dsonar.host.url=http://13.200.205.49:9000 -Dsonar.login=${SONAR_TOKEN}"
+                sh "${scannerHome}/bin/sonar-scanner \
+                 -Dsonar.projectKey=${SONAR_PROJECT_KEY} \ 
+                 -Dsonar.sources=. \ 
+                 -Dsonar.host.url=${SONAR_HOST_URL} \
+                 -Dsonar.login=${SONAR_TOKEN}"
             }
         }
-        sh 'which sonar-scanner || echo "not found"'
+
                 }
 
             }
         }
 
-        stage('Dependency Scan') {
-            steps {
-                sh '''
+stage('Dependency Scan') {
+    steps {
+        script {
+            def dcHome = tool 'DependencyCheck'
+            sh """
                 mkdir -p dependency-check-report
-                dependency-check --project "secure-devsecops-app" --scan . --format ALL --out dependency-check-report
-                '''
-            }
+                ${dcHome}/bin/dependency-check.sh \
+                --project "secure-devsecops-app" \
+                --scan . \
+                --format ALL \
+                --out dependency-check-report
+            """
         }
+    }
+}
 
         stage('Run Unit Tests') {
             steps {
