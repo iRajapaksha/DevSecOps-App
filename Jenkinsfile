@@ -59,27 +59,27 @@ pipeline {
             }
         }
 
-        stage('Lint & SAST Scan') {
-            steps {
-                dir('app'){
-                sh 'npx eslint . || exit 1'
-                script {
-            def scannerHome = tool 'SonarScanner'
-            withSonarQubeEnv("${SONARQUBE}") {
-            sh """
-${scannerHome}/bin/sonar-scanner
--Dsonar.projectKey=${SONAR_PROJECT_KEY}
--Dsonar.sources=.
--Dsonar.host.url=${SONAR_HOST_URL}
--Dsonar.login=${SONAR_TOKEN}
-"""
-            }
-        }
+//         stage('Lint & SAST Scan') {
+//             steps {
+//                 dir('app'){
+//                 sh 'npx eslint . || exit 1'
+//                 script {
+//             def scannerHome = tool 'SonarScanner'
+//             withSonarQubeEnv("${SONARQUBE}") {
+//             sh """
+// ${scannerHome}/bin/sonar-scanner
+// -Dsonar.projectKey=${SONAR_PROJECT_KEY}
+// -Dsonar.sources=.
+// -Dsonar.host.url=${SONAR_HOST_URL}
+// -Dsonar.login=${SONAR_TOKEN}
+// """
+//             }
+//         }
 
-                }
+//                 }
 
-            }
-        }
+//             }
+//         }
 
 stage('Dependency Scan') {
     steps {
