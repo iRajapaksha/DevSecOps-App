@@ -60,9 +60,13 @@ stage('Debug ESLint') {
             steps {
                 dir('app'){
                 sh 'npx eslint . || exit 1'
-                withSonarQubeEnv("${SONARQUBE}") {
-                    sh 'sonar-scanner'
-                }
+                script {
+            def scannerHome = tool 'SonarScanner'
+            withSonarQubeEnv("${SONARQUBE}") {
+                sh "${scannerHome}/bin/sonar-scanner"
+            }
+        }
+        sh 'which sonar-scanner || echo "not found"'
                 }
 
             }
