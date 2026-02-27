@@ -83,17 +83,17 @@ pipeline {
 
 stage('Dependency Scan') {
     steps {
-        script {
-            def dcHome = tool 'DependencyCheck'
-            sh """
-                mkdir -p dependency-check-report
-                ${dcHome}/bin/dependency-check.sh \
-                --project "secure-devsecops-app" \
-                --scan . \
-                --format ALL \
-                --out dependency-check-report
-            """
-        }
+        sh '''
+        mkdir -p dependency-check-report
+        docker run --rm \
+          -v $(pwd):/src \
+          -v $(pwd)/dependency-check-report:/report \
+          owasp/dependency-check \
+          --project "secure-devsecops-app" \
+          --scan /app \
+          --format ALL \
+          --out /report
+        '''
     }
 }
 
