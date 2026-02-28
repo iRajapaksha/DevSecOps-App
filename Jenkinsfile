@@ -84,23 +84,33 @@ pipeline {
 stage('Dependency Scan') {
     steps {
         sh '''
-        mkdir -p dependency-check-report
-        docker run --rm \
-          -u 0 \
-          -v $(pwd):/app \
-          -v $(pwd)/dependency-check-report:/report \
-          owasp/dependency-check:latest \
-          --project "devsecops-app" \
-          --scan /app \
-          --format ALL \
-          --out /report
+docker run --rm -u 0 \
+  -v $(pwd):/src \
+  -v $(pwd)/dependency-check-report:/report \
+  -v odc-data:/usr/share/dependency-check/data \
+  owasp/dependency-check \
+  --project "secure-devsecops-app" \
+  --scan /src \
+  --format ALL \
+  --out /report
         '''
+   post {
+        always {
+            publishHTML([
+                reportDir: 'dependency-check-report',
+                reportFiles: 'dependency-check-report.html',
+                reportName: 'Dependency Check Report'
+            ])
+        }
+    }
     }
 }
 
         stage('Run Unit Tests') {
             steps {
-                sh 'npm test'
+               dir('app') {
+                    sh 'npm test'
+                }
             }
         }
 
