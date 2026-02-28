@@ -94,15 +94,13 @@ docker run --rm -u 0 \
   --format ALL \
   --out /report
         '''
-   post {
-        always {
+
             publishHTML([
                 reportDir: 'dependency-check-report',
                 reportFiles: 'dependency-check-report.html',
                 reportName: 'Dependency Check Report'
             ])
-        }
-    }
+
     }
 }
 
