@@ -87,11 +87,11 @@ stage('Dependency Scan') {
         mkdir -p dependency-check-report
         docker run --rm \
           -u 0 \
-          -v $(pwd):/src \
+          -v $(pwd):/app \
           -v $(pwd)/dependency-check-report:/report \
-          owasp/dependency-check \
-          --project "secure-devsecops-app" \
-          --scan /src \
+          owasp/dependency-check:latest \
+          --project "devsecops-app" \
+          --scan /app \
           --format ALL \
           --out /report
         '''
